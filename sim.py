@@ -2,26 +2,49 @@
 
 import random as rand
 import sys
+import argparse
 #Some simulation paramters
 
-SIMROUNDS = 1000
-CUSTOMERCOUNT=100
-SELLERCOUNT=10
-INITIALCASH=10
-SELECTSELLERMODE='ASKFRIENDS'
+
+
+
+parser = argparse.ArgumentParser(description='Simple market simulation')
+parser.add_argument('-n','--simrounds', nargs='?', const=100, default=100, type=int, help='Number of simulation rounds')
+parser.add_argument('-c','--customers', nargs='?', const=100, default=100, type=int, help='Number of customers in simulation')
+parser.add_argument('-s','--sellers', nargs='?', const=10, default=10, type=int, help='Number of sellers in simulation')
+parser.add_argument('-i','--initialcash', nargs='?', const=10, default=10, type=int, help='Amount of cash for each of customer has in the beginning of simulation')
+parser.add_argument('-f','--infectionlifetime', nargs='?', const=10, default=10, type=int, help='Only useful with  selectsellermode DISEASE, defines how many rounds consumer is infected')
+parser.add_argument('-m','--selectsellermode', nargs='?', const='DEFAULT', default='DEFAULT', choices=['DEFAULT','ASKFRIENDS','DISEASE'], help='How customer selects seller')
+args = vars(parser.parse_args())
+
+SIMROUNDS = args['simrounds']
+CUSTOMERCOUNT=args['customers']
+SELLERCOUNT=args['sellers']
+INITIALCASH=args['initialcash']
+SELECTSELLERMODE=args['selectsellermode']
+
+INFECTIONLIFETIME=args['infectionlifetime']
+
 
 class Customer:
     def __init__(self, id):
         self.id=id
         self.cash=INITIALCASH
         self.prevSeller = 0
+        self.infectionLife=0
 
     def demand(self, p):
         return self.cash/p
 
 
-    def cheapSelect(self, s):
+    def cheapSelect(self, s, sellerlist):
+        if not s:
+            s=list()
+            for x in xrange(3):
+                r=rand.randint(0,SELLERCOUNT-1)
+                s.append(sellerlist[r])
         i=0
+    
         tempseller=0
         sortedSellers = sorted(s, key=lambda x: x.price, reverse = False)
         for seller in sortedSellers:
@@ -31,37 +54,50 @@ class Customer:
                 break
         return tempseller
 
-    def selectSeller(self):
-        if SELECTSELLERMODE == "ASKFRIEND":
+    def selectSeller(self, customerlist, sellerlist):
+        if SELECTSELLERMODE == "ASKFRIENDS":
             c=rand.randint(0,CUSTOMERCOUNT-1)
             p=rand.random()
             if p < 0.99:
-                return customers[c].prevSeller
+                return customerlist[c].prevSeller
             else:
-                sellerlist=list()
+                sellerchoicelist=list()
                 for x in xrange(3):
                     s=rand.randint(0,SELLERCOUNT-1)
-                    sellerlist.append(sellers[s])
-                return self.cheapSelect(s)
-        elif SELECTSELLERMODE == 'MOSTFRIENDS':
+                    sellerchoicelist.append(sellers[s])
+                return self.cheapSelect(sellerchoicelist,sellerlist)
+        elif SELECTSELLERMODE == 'DISEASE':
+            if self.infectionLife:
+                self.infectionLife -= 1
+                return self.prevSeller
+            else: 
+                contactlist=list()
+                for x in xrange(3):
+                    c=rand.randint(0,CUSTOMERCOUNT-1)
+                    contactlist.append(customerlist[c])
+                for c in contactlist:
+                    if c.infectionLife:
+                        self.infectionLife=INFECTIONLIFETIME
+                        return c.prevSeller
+                p=rand.random()
+                if p<0.5:
+                    self.infectionLife=INFECTIONLIFETIME
+                    return self.prevSeller
+                    
+            return self.cheapSelect(0,sellerlist)
             
-            return 0
 
         else:
-            sellerlist=list()
-            for x in xrange(3):
-                s=rand.randint(0,SELLERCOUNT-1)
-                sellerlist.append(sellers[s])
 
-            return self.cheapSelect(sellerlist)
+            return self.cheapSelect(0,sellerlist)
 
 
-    def buy(self):
-        seller= self.selectSeller( )        
+    def buy(self, customerlist, sellerlist):
+        seller= self.selectSeller(customerlist, sellerlist )        
         if seller:
             q=self.demand(seller.price)       
             seller.sell(q)        
-            self.prevseller = seller
+            self.prevSeller = seller
 
 class Seller:
     def __init__(self, id):
@@ -76,13 +112,13 @@ class Seller:
     def supply(self, p):
         return p  
 
-    def setprod(self):
+    def setprod(self, customerlist, sellerlist):
         if self.demand>self.production:
-            self.price += 0.5
+            self.price += 0.2
         else:
-            self.price -= 0.5
-        if self.price <0.5:
-            self.price=0.5
+            self.price -= 0.2
+        if self.price <0.2:
+            self.price=0.2
         self.production=self.supply(self.price)
         self.stock=self.production
         self.demand = 0
@@ -113,10 +149,10 @@ for x in xrange(SELLERCOUNT):
 for x in xrange(SIMROUNDS):
 
     for s in sellers:
-        s.setprod()
+        s.setprod(customers, sellers)
         print s.price,
     for c in customers:
-        c.buy()
+        c.buy(customers, sellers)
     print x
 
  

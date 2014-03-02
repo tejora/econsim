@@ -1,5 +1,5 @@
 
-
+from pylab import plot, show, ylim, yticks
 import random as rand
 import sys
 import argparse
@@ -73,7 +73,7 @@ class Customer:
                 return self.prevSeller
             else: 
                 contactlist=list()
-                for x in xrange(3):
+                for x in xrange(2):
                     c=rand.randint(0,CUSTOMERCOUNT-1)
                     contactlist.append(customerlist[c])
                 for c in contactlist:
@@ -85,7 +85,7 @@ class Customer:
                         else:
                             return self.cheapSelect(sellerlist,4)
                 p=rand.random()
-                if p<0.5:
+                if p<0.01:
                     self.infectionLife=INFECTIONLIFETIME
                     if self.prevSeller:
                         self.prevSeller.demand += self.demand(self.prevSeller.price)
@@ -118,7 +118,7 @@ class Seller:
         self.salesq=0
         self.salesm=0
         self.production=1
-        self.price=1
+        self.price=10
         self.stock=100
         self.demand=1
 
@@ -149,6 +149,7 @@ class Seller:
 
 customers=list()
 sellers=list()
+pricearray=list()
 
 for x in xrange(CUSTOMERCOUNT):
     customers.append(Customer(x))
@@ -156,19 +157,23 @@ for x in xrange(CUSTOMERCOUNT):
 
 for x in xrange(SELLERCOUNT):
     sellers.append(Seller(x))
-
+    pricearray.append(list())
 #Main simulation loop
 
 for x in xrange(SIMROUNDS):
-
+    i=0
     for s in sellers:
         s.setprod(customers, sellers)
-        print s.price,
+        pricearray[i].append(s.price)
+        i += 1
     for c in customers:
         c.buy(customers, sellers)
     
-    print x
+    #print x
+for x in pricearray:
+    print x 
+    plot(x)
+show()
 
- 
 
    # print sum(s.price for s in sellers)/float(len(sellers)), ' price %.2f  demand  %.2f stock   %.2f production  %.2f salesq %.2f salesm %.2f' % (sellers[0].price, sellers[0].demand, sellers[0].stock, sellers[0].production, sellers[0].salesq,  sellers[0].salesm )

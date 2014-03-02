@@ -37,38 +37,39 @@ class Customer:
         return self.cash/p
 
 
-    def cheapSelect(self, s, sellerlist):
-        if not s:
-            s=list()
-            for x in xrange(3):
-                r=rand.randint(0,SELLERCOUNT-1)
-                s.append(sellerlist[r])
-        i=0
-    
+    def cheapSelect(self, s,n):
         tempseller=0
-        sortedSellers = sorted(s, key=lambda x: x.price, reverse = False)
+        slist=list()
+        for x in xrange(n):
+            c=rand.randint(0,len(s)-1)
+            slist.append(s[c])
+        #print slist
+        sortedSellers = sorted(slist, key=lambda x: x.price, reverse = False)
         for seller in sortedSellers:
             seller.demand += self.demand(seller.price)
+       #     print seller.stock, seller.price, self.demand(seller.price)
             if seller.stock>self.demand(seller.price):
                 tempseller=seller
                 break
+            if not tempseller:
+                tempseller=sortedSellers[0]
+     #   print tempseller
         return tempseller
 
     def selectSeller(self, customerlist, sellerlist):
         if SELECTSELLERMODE == "ASKFRIENDS":
             c=rand.randint(0,CUSTOMERCOUNT-1)
             p=rand.random()
-            if p < 0.99:
+            if p < 0.6:
+                customerlist[c].prevSeller.demand += self.demand(customerlist[c].prevSeller)
                 return customerlist[c].prevSeller
             else:
-                sellerchoicelist=list()
-                for x in xrange(3):
-                    s=rand.randint(0,SELLERCOUNT-1)
-                    sellerchoicelist.append(sellers[s])
-                return self.cheapSelect(sellerchoicelist,sellerlist)
+                return self.cheapSelect(sellerlist)
         elif SELECTSELLERMODE == 'DISEASE':
             if self.infectionLife:
                 self.infectionLife -= 1
+                if self.prevSeller:
+                    self.prevSeller.demand += self.demand(self.prevSeller.price)
                 return self.prevSeller
             else: 
                 contactlist=list()
@@ -78,25 +79,37 @@ class Customer:
                 for c in contactlist:
                     if c.infectionLife:
                         self.infectionLife=INFECTIONLIFETIME
-                        return c.prevSeller
+                        if self.prevSeller:
+                            c.prevSeller.demand += self.demand(c.prevSeller.price)
+                            return c.prevSeller
+                        else:
+                            return self.cheapSelect(sellerlist,4)
                 p=rand.random()
                 if p<0.5:
                     self.infectionLife=INFECTIONLIFETIME
-                    return self.prevSeller
-                    
-            return self.cheapSelect(0,sellerlist)
+                    if self.prevSeller:
+                        self.prevSeller.demand += self.demand(self.prevSeller.price)
+                        return self.prevSeller
+                    else:
+                        return self.cheapSelect(sellerlist,4)
+
+            return self.cheapSelect(sellerlist,4)
             
 
         else:
 
-            return self.cheapSelect(0,sellerlist)
+            return self.cheapSelect(sellerlist,4)
 
 
     def buy(self, customerlist, sellerlist):
         seller= self.selectSeller(customerlist, sellerlist )        
+     #   print seller,
         if seller:
             q=self.demand(seller.price)       
-            seller.sell(q)        
+            if q<seller.stock:
+                seller.sell(q)
+            else:
+                seller.sell(seller.stock)        
             self.prevSeller = seller
 
 class Seller:
@@ -153,6 +166,7 @@ for x in xrange(SIMROUNDS):
         print s.price,
     for c in customers:
         c.buy(customers, sellers)
+    
     print x
 
  

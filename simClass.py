@@ -1,5 +1,5 @@
-
 import random as rand
+
 class Customer:
     def __init__(self, id, cash, sellermode, infectionlifetime):
         self.id=id
@@ -8,9 +8,9 @@ class Customer:
         self.infectionLife=0
         self.sellermode = sellermode
         self.infectionlifetime=infectionlifetime
+
     def demand(self, p):
         return self.cash/p
-
 
     def cheapSelect(self, s,n):
         tempseller=0
@@ -18,17 +18,14 @@ class Customer:
         for x in xrange(n):
             c=rand.randint(0,len(s)-1)
             slist.append(s[c])
-        #print slist
         sortedSellers = sorted(slist, key=lambda x: x.price, reverse = False)
         for seller in sortedSellers:
             seller.demand += self.demand(seller.price)
-       #     print seller.stock, seller.price, self.demand(seller.price)
             if seller.stock>self.demand(seller.price):
                 tempseller=seller
                 break
             if not tempseller:
                 tempseller=sortedSellers[0]
-     #   print tempseller
         return tempseller
 
     def selectSeller(self, customerlist, sellerlist):
@@ -67,18 +64,12 @@ class Customer:
                         return self.prevSeller
                     else:
                         return self.cheapSelect(sellerlist,4)
-
             return self.cheapSelect(sellerlist,4)
-            
-
         else:
-
             return self.cheapSelect(sellerlist,4)
-
 
     def buy(self, customerlist, sellerlist):
         seller= self.selectSeller(customerlist, sellerlist )        
-     #   print seller,
         if seller:
             q=self.demand(seller.price)       
             if q<seller.stock:

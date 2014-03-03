@@ -4,10 +4,6 @@ from pylab import plot, show, ylim, yticks
 import sys
 import argparse
 import simClass
-#Some simulation paramters
-
-
-
 
 parser = argparse.ArgumentParser(description='Simple market simulation')
 parser.add_argument('-n','--simrounds', nargs='?', const=100, default=100, type=int, help='Number of simulation rounds')
@@ -23,11 +19,7 @@ CUSTOMERCOUNT=args['customers']
 SELLERCOUNT=args['sellers']
 INITIALCASH=args['initialcash']
 SELECTSELLERMODE=args['selectsellermode']
-
 INFECTIONLIFETIME=args['infectionlifetime']
-
-
-#Initialization
 
 customers=list()
 sellers=list()
@@ -36,12 +28,11 @@ pricearray=list()
 for x in xrange(CUSTOMERCOUNT):
     customers.append(simClass.Customer(x, INITIALCASH, SELECTSELLERMODE, INFECTIONLIFETIME))
 
-
 for x in xrange(SELLERCOUNT):
     sellers.append(simClass.Seller(x))
     pricearray.append(list())
-#Main simulation loop
 
+#Main simulation loop
 for x in xrange(SIMROUNDS):
     i=0
     for s in sellers:
@@ -51,11 +42,8 @@ for x in xrange(SIMROUNDS):
     for c in customers:
         c.buy(customers, sellers)
     
-    #print x
 for x in pricearray:
-    print x 
     plot(x)
 show()
 
 
-   # print sum(s.price for s in sellers)/float(len(sellers)), ' price %.2f  demand  %.2f stock   %.2f production  %.2f salesq %.2f salesm %.2f' % (sellers[0].price, sellers[0].demand, sellers[0].stock, sellers[0].production, sellers[0].salesq,  sellers[0].salesm )

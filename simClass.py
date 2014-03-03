@@ -33,7 +33,8 @@ class Customer:
             c=rand.randint(0,len(customerlist)-1)
             p=rand.random()
             if p < 0.6:
-                customerlist[c].prevSeller.demand += self.demand(customerlist[c].prevSeller)
+                customerlist[c].prevSeller.demand += \
+                    self.demand(customerlist[c].prevSeller)
                 return customerlist[c].prevSeller
             else:
                 return self.cheapSelect(sellerlist)
@@ -41,7 +42,8 @@ class Customer:
             if self.infectionLife:
                 self.infectionLife -= 1
                 if self.prevSeller:
-                    self.prevSeller.demand += self.demand(self.prevSeller.price)
+                    self.prevSeller.demand += \
+                        self.demand(self.prevSeller.price)
                 return self.prevSeller
             else: 
                 contactlist=list()
@@ -52,7 +54,8 @@ class Customer:
                     if c.infectionLife:
                         self.infectionLife=self.infectionlifetime
                         if self.prevSeller:
-                            c.prevSeller.demand += self.demand(c.prevSeller.price)
+                            c.prevSeller.demand += \
+                                self.demand(c.prevSeller.price)
                             return c.prevSeller
                         else:
                             return self.cheapSelect(sellerlist,4)
@@ -60,7 +63,8 @@ class Customer:
                 if p<0.01:
                     self.infectionLife=self.infectionlifetime
                     if self.prevSeller:
-                        self.prevSeller.demand += self.demand(self.prevSeller.price)
+                        self.prevSeller.demand += \
+                            self.demand(self.prevSeller.price)
                         return self.prevSeller
                     else:
                         return self.cheapSelect(sellerlist,4)

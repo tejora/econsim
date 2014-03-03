@@ -1,3 +1,4 @@
+#! /usr/bin/python
 
 from pylab import plot, show, ylim, yticks
 import random as rand

@@ -9,9 +9,11 @@ class Customer:
         self.sellermode = sellermode
         self.infectionlifetime=infectionlifetime
 
+# Function to define the demand of the buyer given the price offered
     def demand(self, p):
         return self.cash/p
-
+# function to return cheapest seller of n randomly 
+# selected sellers from list s of sellers
     def cheapSelect(self, s,n):
         tempseller=0
         slist=list()
@@ -71,7 +73,7 @@ class Customer:
             return self.cheapSelect(sellerlist,4)
         else:
             return self.cheapSelect(sellerlist,4)
-
+# main function to select sellers and make purchase
     def buy(self, customerlist, sellerlist):
         seller= self.selectSeller(customerlist, sellerlist )        
         if seller:
